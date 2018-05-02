@@ -3,8 +3,11 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { AppLoading, Asset, Font } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import RootNavigation from './navigation/RootNavigation';
+import MainTabNavigator from './navigation/MainTabNavigator';
 import ApiKeys from './constants/ApiKeys';
 import * as firebase from 'firebase';
+import { Provider } from 'react-redux';
+import { store } from './redux/app-redux.js';
 
 export default class App extends React.Component {
 
@@ -12,19 +15,22 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       isLoadingComplete: false,
+      isAuthenticationReady: false,
+      isAuthenticated: false,
     };
 
-    // Initialize Firebase => if statement to prevent errors if firebase
-    //is not initialized, also prevents multiple initialize attempts.
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(ApiKeys.FirebaseConfig);
-     }
+    // Initialize Firebase...
+    if (!firebase.apps.length) { firebase.initializeApp(ApiKeys.FirebaseConfig); }
+    firebase.auth().onAuthStateChanged(this.onAuthStateChanged);
   }
 
+  onAuthStateChanged = (user) => {
+    this.setState({isAuthenticationReady: true});
+    this.setState({isAuthenticated: !!user});
+  }
 
   render() {
-    if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
+    if ( (!this.state.isLoadingComplete || !this.state.isAuthenticationReady) && !this.props.skipLoadingScreen) {
       return (
         <AppLoading
           startAsync={this._loadResourcesAsync}
@@ -34,11 +40,13 @@ export default class App extends React.Component {
       );
     } else {
       return (
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          {Platform.OS === 'android' && <View style={styles.StatusBarUnderlay} />}
-          <RootNavigation />
-        </View>
+        <Provider store={store}>
+          <View style={styles.container}>
+            {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+            {Platform.OS === 'android' && <View style={styles.StatusBarUnderlay} />}
+            <RootNavigation />
+          </View>
+        </Provider>
       );
     }
   }

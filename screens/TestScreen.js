@@ -1,17 +1,56 @@
 import React from 'react';
-import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
+import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Button } from 'react-native';
 import { TestComponent } from './../components/AppComponents';
+import * as firebase from 'firebase';
+import { connect } from 'react-redux';
+import { setFavoriteAnimal } from '../redux/app-redux.js';
 
-export default class TestScreen extends React.Component {
+const mapStateToProps = (state) => {
+  return {
+    favoriteAnimal: state.favoriteAnimal,
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setFavoriteAnimal: (text) => { dispatch(setFavoriteAnimal(text)) }
+  };
+}
+
+class TestScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      favoriteAnimal: this.props.favoriteAnimal,
+    }
+  }
+
+  onSignoutPress = () => {
+    firebase.auth().signOut();
+  }
+
+  onSetFavoriteAnimalPress = () => {
+    this.props.setFavoriteAnimal(this.state.favoriteAnimal);
+  }
+
   render() {
     return (
       <View style={{paddingTop:60}}>
-        <Text>Hello World</Text>
-        <TestComponent />
+        <Button title="Signout" onPress={this.onSignoutPress} />
+        <Text>{this.props.favoriteAnimal}</Text>
+
+      <TextInput style={{borderWidth: 1, width: 200, height: 40}}
+        value={this.state.favoriteAnimal}
+        onChangeText={(text) => { this.setState({favoriteAnimal: text}) }}
+      />
+      <Button
+        title="Set Favorite Animal"
+        onPress={this.onSetFavoriteAnimalPress}
+       />
       </View>
     );
   }
@@ -20,3 +59,5 @@ export default class TestScreen extends React.Component {
 const styles = StyleSheet.create({
 
 });
+
+export default connect(mapStateToProps, mapDispatchToProps)(TestScreen);
