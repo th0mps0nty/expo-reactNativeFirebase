@@ -3,17 +3,19 @@ import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, 
 import { TestComponent } from './../components/AppComponents';
 import * as firebase from 'firebase';
 import { connect } from 'react-redux';
-import { setFavoriteAnimal } from '../redux/app-redux.js';
+import { setFavoriteAnimal, watchPersonData } from '../redux/app-redux.js';
 
 const mapStateToProps = (state) => {
   return {
     favoriteAnimal: state.favoriteAnimal,
+    personData: state.personData,
   };
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setFavoriteAnimal: (text) => { dispatch(setFavoriteAnimal(text)) }
+    setFavoriteAnimal: (text) => { dispatch(setFavoriteAnimal(text)) },
+    watchPersonData: () => { dispatch(watchPersonData()) },
   };
 }
 
@@ -27,6 +29,8 @@ class TestScreen extends React.Component {
     this.state = {
       favoriteAnimal: this.props.favoriteAnimal,
     }
+
+    this.props.watchPersonData();
   }
 
   onSignoutPress = () => {
@@ -43,14 +47,17 @@ class TestScreen extends React.Component {
         <Button title="Signout" onPress={this.onSignoutPress} />
         <Text>{this.props.favoriteAnimal}</Text>
 
-      <TextInput style={{borderWidth: 1, width: 200, height: 40}}
-        value={this.state.favoriteAnimal}
-        onChangeText={(text) => { this.setState({favoriteAnimal: text}) }}
-      />
-      <Button
-        title="Set Favorite Animal"
-        onPress={this.onSetFavoriteAnimalPress}
-       />
+        <TextInput style={{borderWidth: 1, width: 200, height: 40}}
+          value={this.state.favoriteAnimal}
+          onChangeText={(text) => { this.setState({favoriteAnimal: text}) }}
+        />
+        <Button
+          title="Set Favorite Animal"
+          onPress={this.onSetFavoriteAnimalPress}
+        />
+
+        <Text>{this.props.personData.firstName}</Text>
+        <Text>{this.props.personData.lastName}</Text>
       </View>
     );
   }

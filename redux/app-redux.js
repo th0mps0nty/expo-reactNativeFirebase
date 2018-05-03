@@ -1,5 +1,6 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
+import * as firebase from 'firebase';
 
 //
 // Initial State...
@@ -7,6 +8,7 @@ import thunkMiddleware from 'redux-thunk';
 
 const initialState = {
   favoriteAnimal: "duck",
+  personData: { },
 };
 
 //
@@ -15,8 +17,14 @@ const initialState = {
 
 const reducer = (state = initialState, action) => {
   switch(action.type) {
-    case "setFavoriteAnimal": return { ...state, favoriteAnimal: action.value };
-    default: return state;
+    case "setFavoriteAnimal":
+      return { ...state, favoriteAnimal: action.value };
+
+    case "setPersonData":
+      return { ...state, personData: action.value };
+
+    default:
+      return state;
   }
 };
 
@@ -38,4 +46,23 @@ const setFavoriteAnimal = (favoriteAnimal) => {
   };
 }
 
-export { setFavoriteAnimal };
+const setPersonData = (personData) => {
+  return {
+    type: "setPersonData",
+    value: personData
+  };
+}
+
+const watchPersonData = () => {
+  return function (dispatch) {
+    firebase.database().ref("Person").on("value", function(snapshot) {
+      var personData = snapshot.val();
+      dispatch(setPersonData(personData));
+    }, function(error) {
+
+    });
+
+  };
+}
+
+export { setFavoriteAnimal, setPersonData, watchPersonData };
