@@ -59,7 +59,7 @@ const watchPersonData = () => {
       var personData = snapshot.val();
       dispatch(setPersonData(personData));
     }, function(error) {
-
+        console.warn(error);
     });
 
   };
